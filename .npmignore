@@ -1,0 +1,6 @@
+node_modules
+imgTest
+.nyc_output
+coverage
+test/demo
+src

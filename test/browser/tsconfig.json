@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    // "allowJs": true,
+    "moduleResolution": "node",
+    "target": "es5",
+    // 这可以对 `this` 上的数据属性进行更严格的推断
+    "strict": true,
+    "sourceMap": true,
+    // "module": "commonjs",
+    "module": "es2015",
+    // "allowSyntheticDefaultImports": true,
+    "outDir": "test/browser/build",
+    "lib": [
+      "dom",
+      "es5",
+      "es6",
+      "es2017",
+      "es2015.promise"
+    ]
+  },
+  "include": [
+    "test/browser/*.test.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

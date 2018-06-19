@@ -1,0 +1,7 @@
+node_modules
+imgTest
+build
+.nyc_output
+coverage
+demo
+.vscode
