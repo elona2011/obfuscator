@@ -1,6 +1,6 @@
-const usedNames: string[] = []
+const usedNames = []
 
-export const hashCode = (s: string) => {
+export const hashCode = s => {
   var hash = 0,
     i,
     chr
@@ -16,7 +16,7 @@ export const hashCode = (s: string) => {
 /**
  *
  */
-export function getVarName(num: number): string[] {
+export function getVarName(num) {
   let r = []
 
   for (let i = 0; i < num; i++) {
@@ -32,7 +32,7 @@ export function getVarName(num: number): string[] {
   return r
 }
 
-function getRandomName(): string {
+function getRandomName() {
   let abc = getAlphabet(),
     abc0 = getChars() + '$_',
     r = abc[Math.floor(Math.random() * abc.length)]
@@ -66,6 +66,6 @@ const getChars = () => {
   return s.slice(0, 10) + s.slice(17, 43) + s.slice(49)
 }
 
-export function deepCopy(obj: any) {
+export function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj))
 }

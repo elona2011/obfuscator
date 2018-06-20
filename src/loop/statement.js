@@ -1,4 +1,3 @@
-import { Node, IfStatement, FunctionDeclaration, FunctionExpression } from 'estree'
 import { generate } from 'escodegen'
 import { parseScript } from 'esprima'
 import { CaseOptions, getNextNum, transformConsequent } from '../function/case'
@@ -12,7 +11,7 @@ import { astFor } from './for'
  *
  * @param param0
  */
-function transformStatement(nodeFn: FunctionDeclaration | FunctionExpression) {
+function transformStatement(nodeFn) {
   while (getStatementNum(nodeFn)) {
     transformConsequent(nodeFn)
 
@@ -29,14 +28,14 @@ function transformStatement(nodeFn: FunctionDeclaration | FunctionExpression) {
  * if或for的数量
  * @param tree
  */
-function getStatementNum(tree: Node): number {
+function getStatementNum(tree) {
   let ifNum = 0,
     forNum = 0,
     whileNum = 0,
     dowhileNum = 0,
     totalNum = 0
 
-  traverseCaseRaw(tree)((caseOptions: CaseOptions) => {
+  traverseCaseRaw(tree)(caseOptions => {
     for (let n of caseOptions.switchCase.consequent) {
       if (n.type === 'IfStatement') {
         ifNum++
@@ -53,7 +52,9 @@ function getStatementNum(tree: Node): number {
       }
     }
   })
-  console.log(`ifNum:${ifNum},forNum:${forNum},whileNum:${whileNum},dowhileNum:${dowhileNum},total:${totalNum}`)
+  console.log(
+    `ifNum:${ifNum},forNum:${forNum},whileNum:${whileNum},dowhileNum:${dowhileNum},total:${totalNum}`
+  )
   return totalNum
 }
 

@@ -1,12 +1,6 @@
 import { expect } from 'chai'
 import { astFn } from '../src/function/fn'
 import { parseScript } from 'esprima'
-import {
-  SwitchStatement,
-  IfStatement,
-  Program,
-  FunctionDeclaration
-} from 'estree'
 
 describe('fn', () => {
   it('base function', () => {
@@ -72,13 +66,13 @@ function parse(before, after, varName) {
     afterBody = parseScript(after).body[0]
 
   astFn({
-    node: <FunctionDeclaration>beforeBody,
+    node: beforeBody,
     names: varName,
-    isRoot: false
+    isRoot: false,
   })
 
   return {
     beforeBody,
-    afterBody
+    afterBody,
   }
 }

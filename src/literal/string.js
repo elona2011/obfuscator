@@ -1,23 +1,22 @@
-import { Node, Literal, BinaryExpression } from 'estree'
 import * as estraverse from 'estraverse'
 import { generate } from 'escodegen'
 import { parseScript } from 'esprima'
 import { replaceNode, validateTypes, traverseNode } from '../utils/traverse'
 import { hashCode } from '../utils/util'
 
-export const astSplitString = validateTypes(['Literal'])((node: Literal): BinaryExpression | undefined => {
+export const astSplitString = validateTypes(['Literal'])(node => {
   if (typeof node.value === 'string' && node.value.length > 0 && node.value !== 'use strict') {
     let exp = node.value
       .split('')
       .reduce((a, b) => `${a}+window.String.fromCharCode(${b.charCodeAt(0)})`, ``)
       .slice(1)
 
-    return (<any>parseScript(exp).body[0]).expression
+    return parseScript(exp).body[0].expression
   }
 })
 
-export const collectString = (tree: Node) => {
-  let allString: { [i: string]: string } = {}
+export const collectString = tree => {
+  let allString = {}
   traverseNode(tree)(
     validateTypes(['Literal'])((node, parent) => {
       if (typeof node.value === 'string') {
@@ -31,20 +30,20 @@ export const collectString = (tree: Node) => {
           }
         }
       }
-    }),
+    })
   )
 
-  let strArr: string[] = []
+  let strArr = []
   for (let n of Object.values(allString)) {
     strArr.push(n)
   }
   return strArr
 }
 
-export const joinStrArr = (strArr: string[]) => {
+export const joinStrArr = strArr => {
   let maxLen = 0,
     len = 1,
-    codes: string[] = []
+    codes = []
 
   strArr.forEach(n => {
     if (n.length > maxLen) maxLen = n.length
@@ -67,7 +66,7 @@ export const joinStrArr = (strArr: string[]) => {
   }
 }
 
-export function splitStr(data: string, code: string, len: number) {
+export function splitStr(data, code, len) {
   var r = []
   for (var i = 0, j = 0; i < code.length; i += len) {
     var dataLen = +code.substr(i, len)

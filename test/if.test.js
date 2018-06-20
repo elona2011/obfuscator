@@ -1,8 +1,7 @@
 import { expect } from 'chai'
-import { astIf, IfOptions } from '../src/loop/if'
+import { astIf } from '../src/loop/if'
 import { parseScript } from 'esprima'
-import { SwitchStatement, IfStatement } from 'estree'
-import { getCaseParams } from '../src/function/case';
+import { getCaseParams } from '../src/function/case'
 
 describe('if', () => {
   it('single if non-block', () => {
@@ -44,10 +43,10 @@ describe('if', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -94,10 +93,10 @@ describe('if', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -145,10 +144,10 @@ describe('if', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -196,10 +195,10 @@ describe('if', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -247,10 +246,10 @@ describe('if', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 })

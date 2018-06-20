@@ -1,4 +1,3 @@
-import { MemberExpression, Node, Statement } from 'estree'
 import { getLiteral, getCallExpression3 } from '../utils/syntaxTree'
 import { validateTypes, traverseFn, replaceNode } from '../utils/traverse'
 import { transformFn } from '../main'
@@ -9,14 +8,14 @@ import { getProperty, wrapReturn } from '../embed/getProperty'
 import { transform } from 'babel-core'
 import { readFileSync } from 'fs'
 
-export const astComputedMember = validateTypes(['MemberExpression'])((node: MemberExpression) => {
+export const astComputedMember = validateTypes(['MemberExpression'])(node => {
   if (node.computed === false && node.property.type === 'Identifier') {
     node.computed = true
     node.property = getLiteral(node.property.name)
   }
 })
 
-export const transformComputedMemberName = (getPropertyFnName: string) => (wrapReturnFnName: string) => (tree: Node) => {
+export const transformComputedMemberName = getPropertyFnName => wrapReturnFnName => tree => {
   let editTree = replaceNode(tree)
 
   //edit static member
@@ -30,13 +29,15 @@ export const transformComputedMemberName = (getPropertyFnName: string) => (wrapR
     let fnArr = nodeFn.body.body
 
     if (isRoot) {
-      let i = (<any>fnArr[0]).directive === 'use strict' ? 1 : 0,
+      let i = fnArr[0].directive === 'use strict' ? 1 : 0,
         codes = parseScript(`
         var ${getPropertyFnName} = ${getProperty.toString()};
         var ${wrapReturnFnName} = ${wrapReturn.toString()};
-        var ${getPropertyFnName} = ${getPropertyFnName}(${splitStr.toString()}("${strObj.data}","${strObj.code}",${strObj.len}));
+        var ${getPropertyFnName} = ${getPropertyFnName}(${splitStr.toString()}("${strObj.data}","${
+          strObj.code
+        }",${strObj.len}));
       `).body
-      fnArr.splice(i, 0, <Statement>transformFn(codes[0]), <Statement>transformFn(codes[1]), <Statement>transformFn(codes[2]))
+      fnArr.splice(i, 0, transformFn(codes[0]), transformFn(codes[1]), transformFn(codes[2]))
     }
   })
 
@@ -46,13 +47,27 @@ export const transformComputedMemberName = (getPropertyFnName: string) => (wrapR
       if (node.property.type === 'Literal' && typeof node.property.value === 'string') {
         if (parent) {
           if (parent.type === 'CallExpression') {
-            return getCallExpression3(getPropertyFnName, wrapReturnFnName, true, node.object, getLiteral(hashCode(node.property.value) + ''))
+            return getCallExpression3(
+              getPropertyFnName,
+              wrapReturnFnName,
+              true,
+              node.object,
+              getLiteral(hashCode(node.property.value) + '')
+            )
           } else if (parent.type !== 'AssignmentExpression') {
-            return getCallExpression3(getPropertyFnName, wrapReturnFnName, false, node.object, getLiteral(hashCode(node.property.value) + ''))
+            return getCallExpression3(
+              getPropertyFnName,
+              wrapReturnFnName,
+              false,
+              node.object,
+              getLiteral(hashCode(node.property.value) + '')
+            )
           }
         }
       }
     })
   )
 }
-export const transformComputedMember = transformComputedMemberName(getVarName(1)[0])(getVarName(1)[0])
+export const transformComputedMember = transformComputedMemberName(getVarName(1)[0])(
+  getVarName(1)[0]
+)

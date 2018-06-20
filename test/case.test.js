@@ -1,7 +1,11 @@
 import { expect } from 'chai'
-import { astMultiStatement, getCaseParams, astMultiDeclaration, astMultiNextStep } from '../src/function/case'
+import {
+  astMultiStatement,
+  getCaseParams,
+  astMultiDeclaration,
+  astMultiNextStep,
+} from '../src/function/case'
 import { parseScript } from 'esprima'
-import { SwitchStatement, IfStatement, Program } from 'estree'
 
 describe('case', () => {
   it('base', () => {
@@ -44,13 +48,11 @@ describe('case', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astMultiStatement({
-      ...getCaseParams(switchCase, switchStatement)
-    })
+    astMultiStatement(getCaseParams(switchCase, switchStatement))
 
     expect(tree).to.eql(parseScript(after))
   })
@@ -93,13 +95,11 @@ describe('case', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astMultiDeclaration({
-      ...getCaseParams(switchCase, switchStatement)
-    })
+    astMultiDeclaration(getCaseParams(switchCase, switchStatement))
 
     expect(tree).to.eql(parseScript(after))
   })
@@ -142,13 +142,11 @@ describe('case', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astMultiStatement({
-      ...getCaseParams(switchCase, switchStatement)
-    })
+    astMultiStatement(getCaseParams(switchCase, switchStatement))
 
     expect(tree).to.eql(parseScript(after))
   })
@@ -183,13 +181,11 @@ describe('case', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astMultiNextStep({
-      ...getCaseParams(switchCase, switchStatement)
-    })
+    astMultiNextStep(getCaseParams(switchCase, switchStatement))
 
     expect(tree).to.eql(parseScript(after))
   })

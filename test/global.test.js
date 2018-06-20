@@ -1,10 +1,7 @@
 import { expect } from 'chai'
-import { astIf, IfOptions } from '../src/loop/if'
 import { parseScript } from 'esprima'
-import { SwitchStatement, IfStatement } from 'estree'
-import { getCaseParams } from '../src/function/case'
 import { astWindow } from '../src/literal/global'
-import { traverseNode, replaceNode } from '../src/utils/traverse'
+import { replaceNode } from '../src/utils/traverse'
 
 describe('global', () => {
   it('window', () => {
@@ -26,7 +23,7 @@ describe('global', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     replaceNode(switchCase)(astWindow)

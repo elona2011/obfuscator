@@ -1,6 +1,6 @@
-export function getProperty(strArr: string[]) {
-  return function(fn: Function) {
-    function hashCode(s: string) {
+export function getProperty(strArr) {
+  return function(fn) {
+    function hashCode(s) {
       var hash = 0,
         i,
         chr
@@ -13,11 +13,11 @@ export function getProperty(strArr: string[]) {
       return hash
     }
 
-    return function(obj: any) {
-      let names: string[] = [],
+    return function(obj) {
+      let names = [],
         r = ''
 
-      return function(hash: string) {
+      return function(hash) {
         for (let n in obj) {
           if (n && hashCode(n) + '' === hash) {
             names.push(n)
@@ -38,9 +38,9 @@ export function getProperty(strArr: string[]) {
   }
 }
 
-export function wrapReturn(isCall: boolean) {
-  return function(obj: any) {
-    return function(prop: string) {
+export function wrapReturn(isCall) {
+  return function(obj) {
+    return function(prop) {
       if (isCall) {
         return function() {
           return obj[prop].apply(obj, arguments)

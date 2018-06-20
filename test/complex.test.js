@@ -6,10 +6,9 @@ import {
   astMultiNextStep,
 } from '../src/function/case'
 import { parseScript } from 'esprima'
-import { SwitchStatement, IfStatement, Program, FunctionDeclaration } from 'estree'
 import { astIf, IfOptions } from '../src/loop/if'
 import { transformConsequent } from '../src/function/case'
-import { transformStatement } from '../src/loop/statement';
+import { transformStatement } from '../src/loop/statement'
 
 describe('complex', () => {
   it('multi if', () => {
@@ -120,10 +119,10 @@ describe('complex', () => {
         }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[5]
 
-    astIf(<IfOptions>getCaseParams(switchCase, switchStatement))
+    astIf(getCaseParams(switchCase, switchStatement))
     transformConsequent(tree)
     expect(tree).to.eql(parseScript(after))
 
@@ -176,7 +175,7 @@ describe('embedded statement', () => {
           }}
       `
     let tree = parseScript(before),
-      switchStatement = <FunctionDeclaration>tree.body[0]
+      switchStatement = tree.body[0]
 
     transformStatement(switchStatement)
     expect(tree).to.eql(parseScript(after))

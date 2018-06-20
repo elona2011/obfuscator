@@ -1,5 +1,4 @@
 import { traverseNode, traverseFn, traverseCase, validateTypes } from '../utils/traverse'
-import { SwitchStatement, Node, Statement, VariableDeclaration } from 'estree'
 import { parseScript } from 'esprima'
 import { getVarName } from '../utils/util'
 import { getMemberExpression } from '../utils/syntaxTree'
@@ -15,12 +14,12 @@ const arr = { num: 48, offset: 7, len: 3 }
  * edit num
  * @param tree
  */
-export function transformNum(tree: Node) {
+export function transformNum(tree) {
   let maxCaseLen = 0
   traverseNode(tree)(
-    validateTypes(['SwitchStatement'])((node: SwitchStatement) => {
+    validateTypes(['SwitchStatement'])(node => {
       maxCaseLen = node.cases.length > maxCaseLen ? node.cases.length : maxCaseLen
-    }),
+    })
   )
 
   const loopArrayVarName = getVarName(1)[0],
@@ -31,8 +30,15 @@ export function transformNum(tree: Node) {
     let fnArr = nodeFn.body.body
 
     if (isRoot) {
-      let i = (<any>fnArr[0]).directive === 'use strict' ? 1 : 0
-      fnArr.splice(i, 0, <Statement>transformFn(parseScript(`var ${loopArrayVarName}=(${loopArray.toString()})(${arrNum},${offset});`).body[0]))
+      let i = fnArr[0].directive === 'use strict' ? 1 : 0
+      fnArr.splice(
+        i,
+        0,
+        transformFn(
+          parseScript(`var ${loopArrayVarName}=(${loopArray.toString()})(${arrNum},${offset});`)
+            .body[0]
+        )
+      )
     }
 
     setArrValues(arrNum, offset, 3)
@@ -42,26 +48,44 @@ export function transformNum(tree: Node) {
       if (whileIndex > 0) {
         let stepInitIndex = whileIndex - 1
         if (fnArr[stepInitIndex].type === 'VariableDeclaration') {
-          ;(<VariableDeclaration>fnArr[stepInitIndex]).declarations[0].init = getMemberExpression(loopArrayVarName, getArrParam((<any>fnArr[stepInitIndex]).declarations[0].init.value))
+          fnArr[stepInitIndex].declarations[0].init = getMemberExpression(
+            loopArrayVarName,
+            getArrParam(fnArr[stepInitIndex].declarations[0].init.value)
+          )
         }
-        ;(<any>fnArr[whileIndex]).test.right = getMemberExpression(loopArrayVarName, getArrParam((<any>fnArr[whileIndex]).test.right.value))
+        fnArr[whileIndex].test.right = getMemberExpression(
+          loopArrayVarName,
+          getArrParam(fnArr[whileIndex].test.right.value)
+        )
       }
 
       //edit case step num and next step num
-      traverseCase(nodeFn)(null, (currentCase: CaseOptions) => {
+      traverseCase(nodeFn)(null, currentCase => {
         if (currentCase.switchCase.test && currentCase.switchCase.test.type === 'Literal') {
-          currentCase.switchCase.test = getMemberExpression(loopArrayVarName, getArrParam(<number>currentCase.switchCase.test.value))
+          currentCase.switchCase.test = getMemberExpression(
+            loopArrayVarName,
+            getArrParam(currentCase.switchCase.test.value)
+          )
         }
         if (currentCase.secondStatement.expression.type === 'AssignmentExpression') {
           if (currentCase.secondStatement.expression.right.type === 'ConditionalExpression') {
             if (currentCase.secondStatement.expression.right.consequent.type === 'Literal') {
-              currentCase.secondStatement.expression.right.consequent = getMemberExpression(loopArrayVarName, getArrParam(<number>currentCase.secondStatement.expression.right.consequent.value))
+              currentCase.secondStatement.expression.right.consequent = getMemberExpression(
+                loopArrayVarName,
+                getArrParam(currentCase.secondStatement.expression.right.consequent.value)
+              )
             }
             if (currentCase.secondStatement.expression.right.alternate.type === 'Literal') {
-              currentCase.secondStatement.expression.right.alternate = getMemberExpression(loopArrayVarName, getArrParam(<number>currentCase.secondStatement.expression.right.alternate.value))
+              currentCase.secondStatement.expression.right.alternate = getMemberExpression(
+                loopArrayVarName,
+                getArrParam(currentCase.secondStatement.expression.right.alternate.value)
+              )
             }
           } else if (currentCase.secondStatement.expression.right.type === 'Literal') {
-            currentCase.secondStatement.expression.right = getMemberExpression(loopArrayVarName, getArrParam(<number>currentCase.secondStatement.expression.right.value))
+            currentCase.secondStatement.expression.right = getMemberExpression(
+              loopArrayVarName,
+              getArrParam(currentCase.secondStatement.expression.right.value)
+            )
           }
         }
       })
@@ -69,12 +93,12 @@ export function transformNum(tree: Node) {
   })
 }
 
-export const getArrParam = (value: number) => getArrIndex(value, arr.len, arr.num, arr.offset)
-export const getLoopArr = (arrNum?: number, offset?: number, len?: number) => {
+export const getArrParam = value => getArrIndex(value, arr.len, arr.num, arr.offset)
+export const getLoopArr = (arrNum, offset, len) => {
   setArrValues(arrNum || 48, offset || 7, len || 3)
   return loopArray(arr.num, arr.offset)
 }
-const setArrValues = (arrNum: number, offset: number, len: number) => {
+const setArrValues = (arrNum, offset, len) => {
   arr.num = arrNum
   arr.offset = offset
   arr.len = len
@@ -85,8 +109,8 @@ const setArrValues = (arrNum: number, offset: number, len: number) => {
  * @param arrNum
  * @param offset
  */
-export function loopArray(arrNum: number, offset: number): any[] {
-  let arr: any[] = [],
+export function loopArray(arrNum, offset) {
+  let arr = [],
     i = 0,
     ii = 0
 
@@ -112,7 +136,7 @@ export function loopArray(arrNum: number, offset: number): any[] {
  * @param arrNum
  * @param offset
  */
-function getArrIndex(num: number, len: number, arrNum: number, offset: number): number[] {
+function getArrIndex(num, len, arrNum, offset) {
   if (num >= arrNum) {
     throw `num:${num} must less than arrNum:${arrNum}!`
   }
@@ -122,7 +146,7 @@ function getArrIndex(num: number, len: number, arrNum: number, offset: number): 
 
   if (len === 1) return [num]
 
-  let nums: number[] = []
+  let nums = []
   for (let i = 0; i < len - 1; i++) {
     nums.push(Math.floor(Math.random() * arrNum))
   }
@@ -136,7 +160,7 @@ function getArrIndex(num: number, len: number, arrNum: number, offset: number): 
         return d
       }) *
         offset) %
-      arrNum,
+      arrNum
   )
   return nums
 }

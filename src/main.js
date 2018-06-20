@@ -1,4 +1,3 @@
-import { Node } from 'estree'
 import * as estraverse from 'estraverse'
 import { transformOptions, transformOptionsDefault } from '.'
 import { traverseFn, traverseCase, replaceNode, traverseNode } from './utils/traverse'
@@ -16,7 +15,7 @@ import { transformNum } from './expression/array'
  *
  * @param tree
  */
-export function transformFn(tree: Node, options: transformOptions = transformOptionsDefault) {
+export function transformFn(tree, options = transformOptionsDefault) {
   traverseFn(tree)((nodeFn, isRoot) => {
     let names = getVarName(1),
       editFn = replaceNode(nodeFn)
@@ -59,7 +58,7 @@ export function transformFn(tree: Node, options: transformOptions = transformOpt
   return tree
 }
 
-export const afterFn = (tree: Node, options: transformOptions = transformOptionsDefault) => {
+export const afterFn = (tree, options = transformOptionsDefault) => {
   transformComputedMember(tree)
 
   options.numberToArray && transformNum(tree)

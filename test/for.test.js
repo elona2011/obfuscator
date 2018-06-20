@@ -1,9 +1,7 @@
 import { expect } from 'chai'
-import { astFor, ForOptions } from '../src/loop/for'
+import { astFor } from '../src/loop/for'
 import { parseScript } from 'esprima'
-import { generate } from 'escodegen'
-import { SwitchStatement, IfStatement, ForStatement } from 'estree'
-import { getCaseParams } from '../src/function/case';
+import { getCaseParams } from '../src/function/case'
 
 describe('for', () => {
   it('base', () => {
@@ -53,10 +51,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -111,10 +109,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -173,10 +171,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -231,10 +229,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -282,10 +280,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -334,10 +332,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -388,10 +386,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -442,10 +440,10 @@ describe('for', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astFor(<ForOptions>getCaseParams(switchCase, switchStatement))
+    astFor(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 })

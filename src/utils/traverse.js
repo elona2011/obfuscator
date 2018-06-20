@@ -1,18 +1,16 @@
-import { Node, BlockStatement, Statement, SwitchCase, SwitchStatement, BreakStatement, ExpressionStatement, FunctionDeclaration, FunctionExpression } from 'estree'
 import * as estraverse from 'estraverse'
 import { CaseOptions, getCaseParams } from '../function/case'
-
-export type cbFn = (node: any, parent: Node | null) => any
 
 /**
  * formatted case handler
  * @param tree
  * @param cb
  */
-export const traverseCase = (tree: Node) => (typeName: string | null, cb: Function) =>
-  traverseCaseRaw(tree)((caseOptions: CaseOptions) => {
+export const traverseCase = tree => (typeName, cb) =>
+  traverseCaseRaw(tree)(caseOptions => {
     if (
-      (caseOptions.switchCase.consequent.length === 3 || caseOptions.switchCase.consequent.length === 2) &&
+      (caseOptions.switchCase.consequent.length === 3 ||
+        caseOptions.switchCase.consequent.length === 2) &&
       caseOptions.secondStatement.type === 'ExpressionStatement' &&
       (caseOptions.firstStatement.type === typeName || typeName === null)
     ) {
@@ -25,7 +23,7 @@ export const traverseCase = (tree: Node) => (typeName: string | null, cb: Functi
  * @param tree
  * @param cb
  */
-export const traverseCaseRaw = (tree: Node) => (cb: Function) => {
+export const traverseCaseRaw = tree => cb => {
   let level = 0
   estraverse.traverse(tree, {
     enter(node, parent) {
@@ -46,23 +44,25 @@ export const traverseCaseRaw = (tree: Node) => (cb: Function) => {
   })
 }
 
-export const traverseFn = (tree: Node) => (cb: (fn: FunctionDeclaration | FunctionExpression, isRoot: boolean) => void) => {
+export const traverseFn = tree => cb => {
   let isRootFn = true
   estrv('traverse')(tree)(
     validateTypes(['FunctionDeclaration', 'FunctionExpression'])((node, parent) => {
       cb(node, isRootFn)
       isRootFn = false
-    }),
+    })
   )
 }
 
-export const traverseNode = (tree: Node) => (cb: cbFn) => estrv('traverse')(tree)(cb)
-export const replaceNode = (tree: Node) => (cb: cbFn) => estrv('replace')(tree)(cb)
+export const traverseNode = tree => cb => estrv('traverse')(tree)(cb)
+export const replaceNode = tree => cb => estrv('replace')(tree)(cb)
 
-export const traverseNodeSkip = (tree: Node) => (skipNodeType: string) => (cb: cbFn) => estrvTypeSkip('traverse')(tree)(skipNodeType)(cb)
-export const replaceNodeSkip = (tree: Node) => (skipNodeType: string) => (cb: cbFn) => estrvTypeSkip('replace')(tree)(skipNodeType)(cb)
+export const traverseNodeSkip = tree => skipNodeType => cb =>
+  estrvTypeSkip('traverse')(tree)(skipNodeType)(cb)
+export const replaceNodeSkip = tree => skipNodeType => cb =>
+  estrvTypeSkip('replace')(tree)(skipNodeType)(cb)
 
-const estrvTypeSkip = (fnType: 'replace' | 'traverse') => (tree: Node) => (skipNodeType: string) => (cb: cbFn) => {
+const estrvTypeSkip = fnType => tree => skipNodeType => cb => {
   let nodeNum = 0
 
   estrv(fnType)(tree)((node, parent) => {
@@ -77,7 +77,7 @@ const estrvTypeSkip = (fnType: 'replace' | 'traverse') => (tree: Node) => (skipN
   })
 }
 
-export const validateTypes = (nodeTypes: string[]) => (cb: cbFn) => (node: any, parent: Node | null) => {
+export const validateTypes = nodeTypes => cb => (node, parent) => {
   if (nodeTypes.find(n => n === node.type)) return cb(node, parent)
 }
-const estrv = (fnType: 'replace' | 'traverse') => (tree: Node) => (enter: cbFn) => estraverse[fnType](tree, { enter })
+const estrv = fnType => tree => enter => estraverse[fnType](tree, { enter })

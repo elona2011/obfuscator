@@ -1,9 +1,7 @@
 import { expect } from 'chai'
-import { astWhile, WhileOptions, astDoWhile, DoWhileOptions } from '../src/loop/while'
+import { astWhile, astDoWhile } from '../src/loop/while'
 import { parseScript } from 'esprima'
-import { generate } from 'escodegen'
-import { SwitchStatement, IfStatement, ForStatement } from 'estree'
-import { getCaseParams } from '../src/function/case';
+import { getCaseParams } from '../src/function/case'
 
 describe('while', () => {
   it('base', () => {
@@ -43,10 +41,10 @@ describe('while', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astWhile(<WhileOptions>getCaseParams(switchCase, switchStatement))
+    astWhile(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -84,10 +82,10 @@ describe('while', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astWhile(<WhileOptions>getCaseParams(switchCase, switchStatement))
+    astWhile(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -128,10 +126,10 @@ describe('while', () => {
       }
     `
     let tree = parseScript(before),
-      switchStatement = <SwitchStatement>tree.body[0],
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
-    astDoWhile(<DoWhileOptions>getCaseParams(switchCase, switchStatement))
+    astDoWhile(getCaseParams(switchCase, switchStatement))
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -172,10 +170,10 @@ describe('while', () => {
   //     }
   //   `
   //   let tree = parseScript(before),
-  //     switchStatement = <SwitchStatement>tree.body[0],
+  //     switchStatement = tree.body[0],
   //     switchCase = switchStatement.cases[0]
 
-  //   astDoWhile(<DoWhileOptions>getCaseParams(switchCase, switchStatement))
+  //   astDoWhile(getCaseParams(switchCase, switchStatement))
   //   expect(tree).to.eql(parseScript(after))
   // })
 })

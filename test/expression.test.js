@@ -1,9 +1,7 @@
 import { expect } from 'chai'
-import { astMultiStatement, getCaseParams } from '../src/function/case'
+import { getCaseParams } from '../src/function/case'
 import { parseScript } from 'esprima'
-import { SwitchStatement, IfStatement, Program } from 'estree'
-import { astExp, ExpOptions } from '../src/expression/expression'
-import * as estraverse from 'estraverse'
+import { astExp } from '../src/expression/expression'
 
 describe('expression', () => {
   it('secondStatement', () => {
@@ -47,16 +45,18 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[1]
 
+      debugger
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right.test.property,
-      varNames: names
+      varNames: names,
     })
 
+    debugger
     expect(tree).to.eql(parseScript(after))
   })
 
@@ -103,14 +103,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[1]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.arguments[0].property,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -159,14 +159,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[1]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.arguments[0],
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -215,14 +215,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[1]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -266,14 +266,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -312,14 +312,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -358,14 +358,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -399,14 +399,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
@@ -445,14 +445,14 @@ describe('expression', () => {
           break
       }
     `
-    let tree: Program = parseScript(before),
-      switchStatement = <any>tree.body[0],
+    let tree = parseScript(before),
+      switchStatement = tree.body[0],
       switchCase = switchStatement.cases[0]
 
     astExp({
-      ...(<ExpOptions>getCaseParams(switchCase, switchStatement)),
+      ...getCaseParams(switchCase, switchStatement),
       node: switchCase.consequent[0].expression.right,
-      varNames: names
+      varNames: names,
     })
 
     expect(tree).to.eql(parseScript(after))
