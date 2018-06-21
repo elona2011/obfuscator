@@ -1,6 +1,7 @@
 import * as estraverse from 'estraverse'
 import { CaseOptions, getCaseParams } from '../function/case'
 import traverse from '@babel/traverse'
+import * as t from 'babel-types'
 
 /**
  * formatted case handler
@@ -27,18 +28,18 @@ export const traverseCase = tree => (typeName, cb) =>
 export const traverseCaseRaw = tree => cb => {
   let level = 0
   traverse(tree, {
-    enter(node, parent) {
-      if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+    enter(path) {
+      if (path.node.type === 'FunctionDeclaration' || path.node.type === 'FunctionExpression') {
         level++
         if (level > 1) {
           return estraverse.VisitorOption.Skip
         }
-      } else if (parent && parent.type === 'SwitchStatement' && node.type === 'SwitchCase') {
-        cb(getCaseParams(node, parent))
+      } else if (path.parent && path.parent.type === 'SwitchStatement' && path.node.type === 'SwitchCase') {
+        cb(getCaseParams(path))
       }
     },
-    leave(node, parent) {
-      if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+    leave(path) {
+      if (path.node.type === 'FunctionDeclaration' || path.node.type === 'FunctionExpression') {
         level--
       }
     },
@@ -47,12 +48,15 @@ export const traverseCaseRaw = tree => cb => {
 
 export const traverseFn = tree => cb => {
   let isRootFn = true
-  estrv('traverse')(tree)(
-    validateTypes(['FunctionDeclaration', 'FunctionExpression'])((node, parent) => {
-      cb(node, isRootFn)
-      isRootFn = false
-    })
-  )
+
+  traverse(tree,{
+    enter(path){
+      if(t.isFunctionDeclaration(path.node)||t.isFunctionExpression(path.node)){
+        cb(path)
+        isRootFn = false
+      }
+    }
+  })
 }
 
 // export const traverseNode = tree => cb => estrv('traverse')(tree)(cb)

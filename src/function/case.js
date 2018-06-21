@@ -8,13 +8,14 @@ import { traverseCaseRaw, traverseNode, validateTypes } from '../utils/traverse'
  * @param parent
  * @param varName
  */
-const getCaseParams = (node, parent) => ({
-  switchCase: node,
-  switchStatement: parent,
-  caseLen: parent.cases.length,
-  firstStatement: node.consequent[0],
-  secondStatement: node.consequent[node.consequent.length - 2],
-  varNames: [node.consequent[node.consequent.length - 2].expression.left.name],
+const getCaseParams = (path) => ({
+  path,
+  switchCase: path.node,
+  switchStatement: path.parent,
+  caseLen: path.parent.cases.length,
+  firstStatement: path.node.consequent[0],
+  secondStatement: path.node.consequent[path.node.consequent.length - 2],
+  varNames: [path.node.consequent[path.node.consequent.length - 2].expression.left.name],
 })
 
 const setRawAndValue = (obj, value) => {
