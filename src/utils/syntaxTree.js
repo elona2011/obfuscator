@@ -1,5 +1,7 @@
+import * as t from 'babel-types'
+
 export const getNextStep = (stepName, nextNum) =>
-  newExpressionStatement(newAssignmentExpression(stepName, nextNum))
+  t.expressionStatement(newAssignmentExpression(stepName, nextNum))
 
 export function getMemberExpression(name, valueArr) {
   if (valueArr.length === 0) throw 'valueArr.length should above 0!'
@@ -30,11 +32,11 @@ export const getCallExpression3 = (calleeName, arg1Name, arg1IsCall, arg2, arg3)
     type: 'CallExpression',
     callee: {
       type: 'CallExpression',
-      callee: getIdentifier(calleeName),
+      callee: t.identifier(calleeName),
       arguments: [
         {
           type: 'CallExpression',
-          callee: getIdentifier(arg1Name),
+          callee: t.identifier(arg1Name),
           arguments: [getLiteral(arg1IsCall)],
         },
       ],
@@ -50,28 +52,12 @@ export const newVariableDeclaration = declaration => ({
   type: 'VariableDeclaration',
 })
 
-export const newExpressionStatement = expression => ({
-  expression,
-  type: 'ExpressionStatement',
-})
+export const newAssignmentExpression = (stepName, nextNum) => {
+  return t.assignmentExpression('=', t.identifier(stepName), t.numericLiteral(nextNum))
+}
 
-export const newAssignmentExpression = (stepName, nextNum) => ({
-  left: { name: stepName, type: 'Identifier' },
-  operator: '=',
-  right: getLiteral(nextNum),
-  type: 'AssignmentExpression',
-})
-
-export const createNewCase = (stepName, caseNum, nextNum) => ({
-  consequent: [getNextStep(stepName, nextNum), getBreakStatement()],
-  test: { raw: caseNum + '', type: 'Literal', value: caseNum },
-  type: 'SwitchCase',
-})
-
-const getIdentifier = name => ({
-  type: 'Identifier',
-  name,
-})
+export const createNewCase = (stepName, caseNum, nextNum) =>
+  t.switchCase(t.numericLiteral(caseNum), [getNextStep(stepName, nextNum), t.breakStatement()])
 
 export const getLiteral = value => ({
   type: 'Literal',
@@ -82,11 +68,6 @@ export const getLiteral = value => ({
 export const getBlockStatement = body => ({
   body,
   type: 'BlockStatement',
-})
-
-export const getBreakStatement = () => ({
-  label: null,
-  type: 'BreakStatement',
 })
 
 export function isNextStep(node, stepName) {

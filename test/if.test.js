@@ -1,7 +1,13 @@
-import { expect } from 'chai'
+import chai from 'chai'
 import { astIf } from '../src/loop/if'
-import { parseScript } from 'esprima'
 import { getCaseParams } from '../src/function/case'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+const chaiExclude = require('chai-exclude')
+
+let expect = chai.expect,
+  excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
+chai.use(chaiExclude)
 
 describe('if', () => {
   it('single if non-block', () => {
@@ -9,17 +15,17 @@ describe('if', () => {
       before = `
       switch(${names[0]}){
         case 1:
-          if(b) b++
-          ${names[0]} = 2
-          break
+          if(b) b++;
+          ${names[0]} = 2;
+          break;
 
         case 2:
-          b+=3
-          ${names[0]} = 3
-          break
+          b+=3;
+          ${names[0]} = 3;
+          break;
 
         case 3:
-          break
+          break;
       }
     `,
       after = `
@@ -42,12 +48,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
+    let tree = parse(before),
+      switchStatement = tree.program.body[0],
       switchCase = switchStatement.cases[0]
 
     astIf(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('single if block', () => {
@@ -76,7 +88,7 @@ describe('if', () => {
         case 1:
           ${names[0]} = b?4:2
           break
-        
+
         case 2:
           b+=3
           ${names[0]} = 3
@@ -84,7 +96,7 @@ describe('if', () => {
 
         case 3:
           break
-        
+
         case 4:
           b++
           b+=2
@@ -92,12 +104,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
+    let tree = parse(before),
+      switchStatement = tree.program.body[0],
       switchCase = switchStatement.cases[0]
 
     astIf(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('if and else', () => {
@@ -115,7 +133,7 @@ describe('if', () => {
           }
           ${names[0]} = 2
           break
-        
+
         case 2:
           break
       }
@@ -128,7 +146,7 @@ describe('if', () => {
 
         case 2:
           break
-        
+
         case 3:
           b++
           b++
@@ -143,12 +161,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
+    let tree = parse(before),
+      switchStatement = tree.program.body[0],
       switchCase = switchStatement.cases[0]
 
     astIf(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('else if', () => {
@@ -165,7 +189,7 @@ describe('if', () => {
           }
           ${names[0]} = 2
           break
-        
+
         case 2:
           break
       }
@@ -178,7 +202,7 @@ describe('if', () => {
 
         case 2:
           break
-        
+
         case 3:
           b++
           ${names[0]} = 2
@@ -194,12 +218,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
+    let tree = parse(before),
+      switchStatement = tree.program.body[0],
       switchCase = switchStatement.cases[0]
 
     astIf(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('multi else if without else', () => {
@@ -216,7 +246,7 @@ describe('if', () => {
           }
           ${names[0]} = 2
           break
-        
+
         case 2:
           break
       }
@@ -229,7 +259,7 @@ describe('if', () => {
 
         case 2:
           break
-        
+
         case 3:
           b++
           ${names[0]} = 2
@@ -245,11 +275,17 @@ describe('if', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
+    let tree = parse(before),
+      switchStatement = tree.program.body[0],
       switchCase = switchStatement.cases[0]
 
     astIf(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 })

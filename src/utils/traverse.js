@@ -1,5 +1,6 @@
 import * as estraverse from 'estraverse'
 import { CaseOptions, getCaseParams } from '../function/case'
+import traverse from '@babel/traverse'
 
 /**
  * formatted case handler
@@ -25,7 +26,7 @@ export const traverseCase = tree => (typeName, cb) =>
  */
 export const traverseCaseRaw = tree => cb => {
   let level = 0
-  estraverse.traverse(tree, {
+  traverse(tree, {
     enter(node, parent) {
       if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
         level++
@@ -54,30 +55,26 @@ export const traverseFn = tree => cb => {
   )
 }
 
-export const traverseNode = tree => cb => estrv('traverse')(tree)(cb)
-export const replaceNode = tree => cb => estrv('replace')(tree)(cb)
+// export const traverseNode = tree => cb => estrv('traverse')(tree)(cb)
+// export const replaceNode = tree => cb => estrv('replace')(tree)(cb)
 
-export const traverseNodeSkip = tree => skipNodeType => cb =>
-  estrvTypeSkip('traverse')(tree)(skipNodeType)(cb)
-export const replaceNodeSkip = tree => skipNodeType => cb =>
-  estrvTypeSkip('replace')(tree)(skipNodeType)(cb)
-
-const estrvTypeSkip = fnType => tree => skipNodeType => cb => {
+export const estrvTypeSkip = tree => skipNodeType => cb => {
   let nodeNum = 0
 
-  estrv(fnType)(tree)((node, parent) => {
-    if (node.type === skipNodeType) {
-      nodeNum++
-      if (nodeNum > 1) {
-        return estraverse.VisitorOption.Skip
+  traverse(tree, {
+    enter(path) {
+      if (path.node.type === skipNodeType) {
+        nodeNum++
+        if (nodeNum > 1) {
+          return estraverse.VisitorOption.Skip
+        }
+      } else {
+        return cb(path.node, path.parent)
       }
-    } else {
-      return cb(node, parent)
-    }
+    },
   })
 }
 
-export const validateTypes = nodeTypes => cb => (node, parent) => {
-  if (nodeTypes.find(n => n === node.type)) return cb(node, parent)
+export const validateTypes = nodeTypes => cb => path => {
+  if (nodeTypes.find(n => n === path.node.type)) return cb(path)
 }
-const estrv = fnType => tree => enter => estraverse[fnType](tree, { enter })

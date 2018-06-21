@@ -32,6 +32,10 @@
   "author": "elona2011",
   "license": "ISC",
   "dependencies": {
+    "@babel/generator": "^7.0.0-beta.51",
+    "@babel/parser": "^7.0.0-beta.51",
+    "@babel/traverse": "^7.0.0-beta.51",
+    "@babel/types": "^7.0.0-beta.51",
     "escodegen": "^1.9.0",
     "esprima": "^4.0.0",
     "espurify": "^1.7.0"
@@ -43,6 +47,7 @@
     "babel-register": "^6.26.0",
     "buffer": "4.x",
     "chai": "^4.1.2",
+    "chai-exclude": "^1.0.8",
     "coveralls": "^3.0.0",
     "fs-extra": "^5.0.0",
     "jsdom": "^11.6.2",

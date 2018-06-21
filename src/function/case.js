@@ -1,16 +1,6 @@
-import * as estraverse from 'estraverse'
 import { deepCopy } from '../utils/util'
-import { generate } from 'escodegen'
-import { parseScript } from 'esprima'
-import {
-  getBreakStatement,
-  getNextStep,
-  createNewCase,
-  isNextStep,
-  newVariableDeclaration,
-} from '../utils/syntaxTree'
+import { createNewCase, isNextStep, newVariableDeclaration } from '../utils/syntaxTree'
 import { traverseCaseRaw, traverseNode, validateTypes } from '../utils/traverse'
-import { writeFileSync } from 'fs'
 
 /**
  * get traverseCase and traverseCaseRaw arguments
