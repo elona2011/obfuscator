@@ -4,6 +4,8 @@ import { getCaseParams } from '../src/function/case'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 const chaiExclude = require('chai-exclude')
+import traverse from '@babel/traverse'
+import * as t from 'babel-types'
 
 let expect = chai.expect,
   excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
@@ -55,12 +57,15 @@ describe('for', () => {
           break
       }
     `
-    
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
 
-    astFor(getCaseParams(switchCase, switchStatement))
+    let tree = parse(before)
+    traverse(tree, {
+      enter(path) {
+        if (t.isSwitchCase(path.node)) {
+          astFor(path)
+        }
+      },
+    })
     let bf = generate(tree, {})
     let af = generate(parse(after), {})
 

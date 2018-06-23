@@ -32,10 +32,14 @@ export const traverseCaseRaw = tree => cb => {
       if (path.node.type === 'FunctionDeclaration' || path.node.type === 'FunctionExpression') {
         level++
         if (level > 1) {
-          return estraverse.VisitorOption.Skip
+          path.skip()
         }
-      } else if (path.parent && path.parent.type === 'SwitchStatement' && path.node.type === 'SwitchCase') {
-        cb(getCaseParams(path))
+      } else if (
+        path.parent &&
+        path.parent.type === 'SwitchStatement' &&
+        path.node.type === 'SwitchCase'
+      ) {
+        cb(path)
       }
     },
     leave(path) {
@@ -49,20 +53,20 @@ export const traverseCaseRaw = tree => cb => {
 export const traverseFn = tree => cb => {
   let isRootFn = true
 
-  traverse(tree,{
-    enter(path){
-      if(t.isFunctionDeclaration(path.node)||t.isFunctionExpression(path.node)){
+  traverse(tree, {
+    enter(path) {
+      if (t.isFunctionDeclaration(path.node) || t.isFunctionExpression(path.node)) {
         cb(path)
         isRootFn = false
       }
-    }
+    },
   })
 }
 
 // export const traverseNode = tree => cb => estrv('traverse')(tree)(cb)
 // export const replaceNode = tree => cb => estrv('replace')(tree)(cb)
 
-export const estrvTypeSkip = tree => skipNodeType => cb => {
+export const estrvTypeSkip = (tree, skipNodeType, cb) => {
   let nodeNum = 0
 
   traverse(tree, {

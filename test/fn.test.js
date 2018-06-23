@@ -1,7 +1,13 @@
-import { expect } from 'chai'
+import chai from 'chai'
 import { astFn } from '../src/function/fn'
 import { parseScript } from 'esprima'
+import traverse from '@babel/traverse'
+import { parse } from '@babel/parser'
+const chaiExclude = require('chai-exclude')
 
+let expect = chai.expect,
+  excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
+chai.use(chaiExclude)
 describe('fn', () => {
   it('base function', () => {
     let varName = 'd',
@@ -27,8 +33,18 @@ describe('fn', () => {
         }
       }
     `
-    let { beforeBody, afterBody } = parse(before, after, varName)
-    expect(beforeBody).to.eql(afterBody)
+
+    let b = parse(before),
+      a = parse(after)
+
+    traverse(b, {
+      Function(path) {
+        astFn(path, varName)
+      },
+    })
+    expect(b)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(a)
   })
 
   it('use strict', () => {
@@ -61,18 +77,18 @@ describe('fn', () => {
   })
 })
 
-function parse(before, after, varName) {
-  let beforeBody = parseScript(before).body[0],
-    afterBody = parseScript(after).body[0]
+// function parse(before, after, varName) {
+//   let beforeBody = parseScript(before).body[0],
+//     afterBody = parseScript(after).body[0]
 
-  astFn({
-    node: beforeBody,
-    names: varName,
-    isRoot: false,
-  })
+//   astFn({
+//     node: beforeBody,
+//     names: varName,
+//     isRoot: false,
+//   })
 
-  return {
-    beforeBody,
-    afterBody,
-  }
-}
+//   return {
+//     beforeBody,
+//     afterBody,
+//   }
+// }

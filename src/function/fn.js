@@ -2,20 +2,21 @@ import * as estraverse from 'estraverse'
 import { parseScript } from 'esprima'
 import { CaseOptions } from './case'
 import { traverseCaseRaw } from '../utils/traverse'
+import { parse } from '@babel/parser'
+import traverse from '@babel/traverse'
+import * as t from 'babel-types'
 
 /**
  * 将fn转化为while-switch-case形式
  * @param tree
  */
-export function astFn({ node, names, isRoot }) {
-  let codeArr = [],
-    codeIndex = 1,
-    fnBody = ``,
-    useStrict =
-      node.body &&
-      node.body.body &&
-      node.body.body[0] &&
-      node.body.body[0].directive === 'use strict'
+export function astFn(path, names) {
+  debugger
+  let useStrict =
+      path.node.body &&
+      path.node.body.body &&
+      path.node.body.body[0] &&
+      path.node.body.body[0].directive === 'use strict'
         ? `'use strict'`
         : ``,
     codeStr = `function a(){
@@ -30,15 +31,18 @@ export function astFn({ node, names, isRoot }) {
       }
     }`
 
-  let newTree = parseScript(codeStr)
-  traverseCaseRaw(newTree)(({ switchCase }) => {
-    if (useStrict) {
-      node.body.body.shift()
-    }
-    switchCase.consequent = node.body.body.concat(switchCase.consequent)
+  let newTree = parse(codeStr)
+  traverse(newTree, {
+    SwitchCase(newPath) {
+      if (useStrict) {
+        path.node.body.body.shift()
+      }
+      newPath.node.consequent = path.node.body.body.concat(newPath.node.consequent)
+    },
   })
-  node.body = newTree.body[0].body
-  delEmptyStatement(newTree)
+
+  path.node.body = newTree.program.body[0].body
+  // delEmptyStatement(newTree)
 }
 
 function delEmptyStatement(node) {

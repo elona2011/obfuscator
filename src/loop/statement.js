@@ -15,9 +15,10 @@ function transformStatement(nodeFn) {
   while (getStatementNum(nodeFn)) {
     transformConsequent(nodeFn)
 
-    let traverseFn = traverseCase(nodeFn)
+    let traverseFn = traverseCaseRaw(nodeFn)
     traverseFn('IfStatement', astIf)
-    traverseFn('ForStatement', astFor)
+    traverseCase(nodeFn, astFor)
+    // traverseFn('ForStatement', astFor)
     traverseFn('WhileStatement', astWhile)
     traverseFn('DoWhileStatement', astDoWhile)
   }
