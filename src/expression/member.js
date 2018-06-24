@@ -7,17 +7,22 @@ import { collectString, joinStrArr, splitStr } from '../literal/string'
 import { getProperty, wrapReturn } from '../embed/getProperty'
 import { transform } from 'babel-core'
 import { readFileSync } from 'fs'
+import * as t from 'babel-types'
 
-export const astComputedMember = validateTypes(['MemberExpression'])(node => {
-  if (node.computed === false && node.property.type === 'Identifier') {
-    node.computed = true
-    node.property = getLiteral(node.property.name)
+export const astComputedMember = path => {
+  if (
+    path.node.computed === false &&
+    path.node.property.type === 'Identifier'
+  ) {
+    path.node.computed = true
+    path.node.property = t.StringLiteral(path.node.property.name)
   }
-})
+}
 
-export const transformComputedMemberName = getPropertyFnName => wrapReturnFnName => tree => {
+export const transformComputedMemberName = getPropertyFnName => wrapReturnFnName => path => {
   let editTree = replaceNode(tree)
 
+  path.traverse({})
   //edit static member
   editTree(astComputedMember)
 
@@ -33,18 +38,27 @@ export const transformComputedMemberName = getPropertyFnName => wrapReturnFnName
         codes = parseScript(`
         var ${getPropertyFnName} = ${getProperty.toString()};
         var ${wrapReturnFnName} = ${wrapReturn.toString()};
-        var ${getPropertyFnName} = ${getPropertyFnName}(${splitStr.toString()}("${strObj.data}","${
-          strObj.code
-        }",${strObj.len}));
+        var ${getPropertyFnName} = ${getPropertyFnName}(${splitStr.toString()}("${
+          strObj.data
+        }","${strObj.code}",${strObj.len}));
       `).body
-      fnArr.splice(i, 0, transformFn(codes[0]), transformFn(codes[1]), transformFn(codes[2]))
+      fnArr.splice(
+        i,
+        0,
+        transformFn(codes[0]),
+        transformFn(codes[1]),
+        transformFn(codes[2])
+      )
     }
   })
 
   // replace obj
   replaceNode(tree)(
     validateTypes(['MemberExpression'])((node, parent) => {
-      if (node.property.type === 'Literal' && typeof node.property.value === 'string') {
+      if (
+        node.property.type === 'Literal' &&
+        typeof node.property.value === 'string'
+      ) {
         if (parent) {
           if (parent.type === 'CallExpression') {
             return getCallExpression3(
@@ -68,6 +82,7 @@ export const transformComputedMemberName = getPropertyFnName => wrapReturnFnName
     })
   )
 }
-export const transformComputedMember = transformComputedMemberName(getVarName(1)[0])(
+
+export const transformComputedMember = transformComputedMemberName(
   getVarName(1)[0]
-)
+)(getVarName(1)[0])

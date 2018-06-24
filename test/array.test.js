@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { getLoopArr, getArrParam } from '../src/expression/array'
-debugger
+
 describe('array', () => {
   it(`len=default`, () => {
     let arr = getLoopArr(),

@@ -1,7 +1,25 @@
-import { expect } from 'chai'
 import { astWhile, astDoWhile } from '../src/loop/while'
-import { parseScript } from 'esprima'
-import { getCaseParams } from '../src/function/case'
+import chai from 'chai'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+const chaiExclude = require('chai-exclude')
+import traverse from '@babel/traverse'
+import * as t from 'babel-types'
+
+let expect = chai.expect,
+  excludeStrArr = [
+    'column',
+    'line',
+    'end',
+    'start',
+    'loc',
+    'extra',
+    'comments',
+    'innerComments',
+    'leadingComments',
+    'trailingComments',
+  ]
+chai.use(chaiExclude)
 
 describe('while', () => {
   it('base', () => {
@@ -40,12 +58,19 @@ describe('while', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astWhile(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astWhile(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('without block', () => {
@@ -81,12 +106,19 @@ describe('while', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astWhile(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astWhile(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('do while', () => {
@@ -125,12 +157,19 @@ describe('while', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astDoWhile(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astDoWhile(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   // it('do while without block', () => {

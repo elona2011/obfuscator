@@ -26,7 +26,13 @@ export function getMemberExpression(name, valueArr) {
   return r
 }
 
-export const getCallExpression3 = (calleeName, arg1Name, arg1IsCall, arg2, arg3) => ({
+export const getCallExpression3 = (
+  calleeName,
+  arg1Name,
+  arg1IsCall,
+  arg2,
+  arg3
+) => ({
   type: 'CallExpression',
   callee: {
     type: 'CallExpression',
@@ -53,11 +59,18 @@ export const newVariableDeclaration = declaration => ({
 })
 
 export const newAssignmentExpression = (stepName, nextNum) => {
-  return t.assignmentExpression('=', t.identifier(stepName), t.numericLiteral(nextNum))
+  return t.assignmentExpression(
+    '=',
+    t.identifier(stepName),
+    t.numericLiteral(nextNum)
+  )
 }
 
 export const createNewCase = (stepName, caseNum, nextNum) =>
-  t.switchCase(t.numericLiteral(caseNum), [getNextStep(stepName, nextNum), t.breakStatement()])
+  t.switchCase(t.numericLiteral(caseNum), [
+    getNextStep(stepName, nextNum),
+    t.breakStatement(),
+  ])
 
 export const getLiteral = value => ({
   type: 'Literal',
@@ -74,6 +87,7 @@ export function isNextStep(node, stepName) {
   if (
     node.type === 'ExpressionStatement' &&
     node.expression.type === 'AssignmentExpression' &&
+    node.expression.operator === '=' &&
     node.expression.left.type === 'Identifier' &&
     node.expression.left.name === stepName
   ) {

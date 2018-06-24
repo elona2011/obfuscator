@@ -1,48 +1,65 @@
 import * as estraverse from 'estraverse'
-import { parseScript } from 'esprima'
-import { CaseOptions } from './case'
-import { traverseCaseRaw } from '../utils/traverse'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import * as t from 'babel-types'
+import { getVarName } from 'yamutils'
 
 /**
  * 将fn转化为while-switch-case形式
  * @param tree
  */
-export function astFn(path, names) {
-  debugger
-  let useStrict =
-      path.node.body &&
-      path.node.body.body &&
-      path.node.body.body[0] &&
-      path.node.body.body[0].directive === 'use strict'
-        ? `'use strict'`
-        : ``,
-    codeStr = `function a(){
-      ${useStrict}
-      var ${names[0]}=1;
-      while(${names[0]}!==0){
-        switch(${names[0]}){
-          case 1:
-            ${names[0]}=0;
-            break;
-        }
-      }
-    }`
+export function astFn(path, name) {
+  let useStrict = '',
+    varName = name || getVarName(5)
 
-  let newTree = parse(codeStr)
-  traverse(newTree, {
-    SwitchCase(newPath) {
-      if (useStrict) {
-        path.node.body.body.shift()
+  //skip function
+  if (path.node.body.body.length) {
+    let leadingComments = path.node.body.body[0].leadingComments
+    if (leadingComments && leadingComments.length) {
+      if (leadingComments[0].value === 'no ast edit') {
+        return 'no while-switch-case'
       }
-      newPath.node.consequent = path.node.body.body.concat(newPath.node.consequent)
-    },
-  })
+    }
+  }
 
-  path.node.body = newTree.program.body[0].body
-  // delEmptyStatement(newTree)
+  //edit function
+  if (!path.node.isASTEdited) {
+    path.traverse({
+      Function(path) {
+        path.stop()
+      },
+      Directive(path) {
+        if (path.node.value.value === 'use strict')
+          useStrict = `
+          'use strict'`
+      },
+    })
+
+    let codeStr = `function a(){
+          ${useStrict}
+          var ${varName}=1;
+          while(${varName}!==0){
+            switch(${varName}){
+              case 1:
+                ${varName}=0;
+                break;
+            }
+          }
+        }`
+
+    let newTree = parse(codeStr)
+    traverse(newTree, {
+      SwitchCase(newPath) {
+        newPath.node.consequent = path.node.body.body.concat(
+          newPath.node.consequent
+        )
+      },
+    })
+
+    path.node.body = newTree.program.body[0].body
+    path.node.isASTEdited = true
+    // delEmptyStatement(newTree)
+  }
 }
 
 function delEmptyStatement(node) {

@@ -1,11 +1,44 @@
-import { expect } from 'chai'
 import {
   astMultiStatement,
-  getCaseParams,
   astMultiDeclaration,
   astMultiNextStep,
+  getCaseParams,
 } from '../src/function/case'
-import { parseScript } from 'esprima'
+import chai from 'chai'
+import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+const chaiExclude = require('chai-exclude')
+import traverse from '@babel/traverse'
+import * as t from 'babel-types'
+
+let expect = chai.expect,
+  excludeStrArr = [
+    'column',
+    'line',
+    'end',
+    'start',
+    'loc',
+    'extra',
+    'comments',
+    'innerComments',
+    'leadingComments',
+    'trailingComments',
+  ]
+chai.use(chaiExclude)
+
+describe('getCaseParams', () => {
+  it('throw Error when no SwitchCase', () => {
+    let code = `
+      var a = 1
+    `
+    let tree = parse(code)
+    traverse(tree, {
+      VariableDeclarator(path) {
+        expect(() => getCaseParams(path)).to.throw()
+      },
+    })
+  })
+})
 
 describe('case', () => {
   it('base', () => {
@@ -48,13 +81,19 @@ describe('case', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astMultiStatement(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astMultiStatement(getCaseParams(switchCase, switchStatement))
-
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('multi declarations', () => {
@@ -95,13 +134,19 @@ describe('case', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astMultiDeclaration(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astMultiDeclaration(getCaseParams(switchCase, switchStatement))
-
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('base', () => {
@@ -142,13 +187,19 @@ describe('case', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astMultiStatement(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astMultiStatement(getCaseParams(switchCase, switchStatement))
-
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('multi nextStep', () => {
@@ -181,12 +232,18 @@ describe('case', () => {
           break
       }
     `
-    let tree = parseScript(before),
-      switchStatement = tree.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astMultiNextStep(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astMultiNextStep(getCaseParams(switchCase, switchStatement))
-
-    expect(tree).to.eql(parseScript(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 })

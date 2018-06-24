@@ -1,9 +1,9 @@
 import chai from 'chai'
 import { astIf } from '../src/loop/if'
-import { getCaseParams } from '../src/function/case'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 const chaiExclude = require('chai-exclude')
+import traverse from '@babel/traverse'
 
 let expect = chai.expect,
   excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
@@ -48,16 +48,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let b = parse(before)
 
-    astIf(getCaseParams(switchCase, switchStatement))
-    let bf = generate(tree, {})
+    traverse(b, {
+      SwitchCase(path) {
+        astIf(path)
+      },
+    })
+    let bf = generate(b, {})
     let af = generate(parse(after), {})
 
     expect(bf.code).to.equal(af.code)
-    expect(tree)
+    expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(parse(after))
   })
@@ -104,16 +106,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let b = parse(before)
 
-    astIf(getCaseParams(switchCase, switchStatement))
-    let bf = generate(tree, {})
+    traverse(b, {
+      SwitchCase(path) {
+        astIf(path)
+      },
+    })
+    let bf = generate(b, {})
     let af = generate(parse(after), {})
 
     expect(bf.code).to.equal(af.code)
-    expect(tree)
+    expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(parse(after))
   })
@@ -161,16 +165,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let b = parse(before)
 
-    astIf(getCaseParams(switchCase, switchStatement))
-    let bf = generate(tree, {})
+    traverse(b, {
+      SwitchCase(path) {
+        astIf(path)
+      },
+    })
+    let bf = generate(b, {})
     let af = generate(parse(after), {})
 
     expect(bf.code).to.equal(af.code)
-    expect(tree)
+    expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(parse(after))
   })
@@ -218,16 +224,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let b = parse(before)
 
-    astIf(getCaseParams(switchCase, switchStatement))
-    let bf = generate(tree, {})
+    traverse(b, {
+      SwitchCase(path) {
+        astIf(path)
+      },
+    })
+    let bf = generate(b, {})
     let af = generate(parse(after), {})
 
     expect(bf.code).to.equal(af.code)
-    expect(tree)
+    expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(parse(after))
   })
@@ -275,16 +283,18 @@ describe('if', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let b = parse(before)
 
-    astIf(getCaseParams(switchCase, switchStatement))
-    let bf = generate(tree, {})
+    traverse(b, {
+      SwitchCase(path) {
+        astIf(path)
+      },
+    })
+    let bf = generate(b, {})
     let af = generate(parse(after), {})
 
     expect(bf.code).to.equal(af.code)
-    expect(tree)
+    expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(parse(after))
   })

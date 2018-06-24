@@ -1,6 +1,5 @@
 import { astFor } from '../src/loop/for'
 import chai from 'chai'
-import { getCaseParams } from '../src/function/case'
 import { parse } from '@babel/parser'
 import generate from '@babel/generator'
 const chaiExclude = require('chai-exclude')
@@ -8,8 +7,20 @@ import traverse from '@babel/traverse'
 import * as t from 'babel-types'
 
 let expect = chai.expect,
-  excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
+  excludeStrArr = [
+    'column',
+    'line',
+    'end',
+    'start',
+    'loc',
+    'extra',
+    'comments',
+    'innerComments',
+    'leadingComments',
+    'trailingComments',
+  ]
 chai.use(chaiExclude)
+
 describe('for', () => {
   it('base', () => {
     let varName = ['ab'],
@@ -60,10 +71,8 @@ describe('for', () => {
 
     let tree = parse(before)
     traverse(tree, {
-      enter(path) {
-        if (t.isSwitchCase(path.node)) {
-          astFor(path)
-        }
+      SwitchCase(path) {
+        astFor(path)
       },
     })
     let bf = generate(tree, {})
@@ -125,12 +134,19 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('embedded for', () => {
@@ -187,12 +203,20 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        debugger
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('continue', () => {
@@ -245,12 +269,19 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('without block', () => {
@@ -296,12 +327,19 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('without init and update', () => {
@@ -348,12 +386,19 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('multi init and update', () => {
@@ -402,12 +447,19 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 
   it('init outside', () => {
@@ -456,11 +508,18 @@ describe('for', () => {
           break
       }
     `
-    let tree = parse(before),
-      switchStatement = tree.program.body[0],
-      switchCase = switchStatement.cases[0]
+    let tree = parse(before)
+    traverse(tree, {
+      SwitchCase(path) {
+        astFor(path)
+      },
+    })
+    let bf = generate(tree, {})
+    let af = generate(parse(after), {})
 
-    astFor(getCaseParams(switchCase, switchStatement))
-    expect(tree).to.eql(parse(after))
+    expect(bf.code).to.equal(af.code)
+    expect(tree)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(parse(after))
   })
 })

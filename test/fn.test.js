@@ -1,13 +1,15 @@
 import chai from 'chai'
 import { astFn } from '../src/function/fn'
-import { parseScript } from 'esprima'
 import traverse from '@babel/traverse'
 import { parse } from '@babel/parser'
+import generate from '@babel/generator'
+
 const chaiExclude = require('chai-exclude')
 
 let expect = chai.expect,
-  excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra', 'comments']
+  excludeStrArr = ['column', 'line', 'end', 'start', 'loc', 'extra']
 chai.use(chaiExclude)
+
 describe('fn', () => {
   it('base function', () => {
     let varName = 'd',
@@ -37,11 +39,16 @@ describe('fn', () => {
     let b = parse(before),
       a = parse(after)
 
+    a.program.body[0].isASTEdited = true
     traverse(b, {
       Function(path) {
         astFn(path, varName)
       },
     })
+    let bf = generate(b, {})
+    let af = generate(a, {})
+
+    expect(bf.code).to.equal(af.code)
     expect(b)
       .excludingEvery(excludeStrArr)
       .to.deep.equal(a)
@@ -59,7 +66,6 @@ describe('fn', () => {
       after = `
       function ab(){
         'use strict'
-          
         var ${names[0]}=1
         while(${names[0]}!==0){
           switch(${names[0]}){
@@ -72,23 +78,87 @@ describe('fn', () => {
         }
       }
     `
-    let { beforeBody, afterBody } = parse(before, after, names)
-    expect(beforeBody).to.eql(afterBody)
+    let b = parse(before),
+      a = parse(after)
+
+    a.program.body[0].isASTEdited = true
+    traverse(b, {
+      Function(path) {
+        astFn(path, names[0])
+      },
+    })
+    let bf = generate(b, {})
+    let af = generate(a, {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(b)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(a)
+  })
+
+  it('no ast edit', () => {
+    let names = ['d'],
+      before = `
+      function ab(){
+        //no ast edit
+        b+=2
+        c+=3
+      }
+    `,
+      after = `
+      function ab(){
+        //no ast edit
+        b+=2
+        c+=3
+      }
+    `
+    let b = parse(before),
+      a = parse(after)
+
+    traverse(b, {
+      Function(path) {
+        astFn(path, names[0])
+      },
+    })
+    let bf = generate(b, {})
+    let af = generate(a, {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(b)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(a)
+  })
+
+  it('isASTEdited', () => {
+    let names = ['d'],
+      before = `
+      function ab(){
+        b+=2
+        c+=3
+      }
+    `,
+      after = `
+      function ab(){
+        b+=2
+        c+=3
+      }
+    `
+    let b = parse(before),
+      a = parse(after)
+
+    a.program.body[0].isASTEdited = true
+    b.program.body[0].isASTEdited = true
+    traverse(b, {
+      Function(path) {
+        astFn(path, names[0])
+      },
+    })
+    let bf = generate(b, {})
+    let af = generate(a, {})
+
+    expect(bf.code).to.equal(af.code)
+    expect(b)
+      .excludingEvery(excludeStrArr)
+      .to.deep.equal(a)
   })
 })
-
-// function parse(before, after, varName) {
-//   let beforeBody = parseScript(before).body[0],
-//     afterBody = parseScript(after).body[0]
-
-//   astFn({
-//     node: beforeBody,
-//     names: varName,
-//     isRoot: false,
-//   })
-
-//   return {
-//     beforeBody,
-//     afterBody,
-//   }
-// }

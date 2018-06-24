@@ -1,8 +1,8 @@
-const { transformMain } = require('./build')
-const { parseScript } = require('esprima')
+const { transformMain } = require('./lib')
+const { parse } = require('@babel/parser')
 
 module.exports = function obfuscate(code, options) {
-  let tree = parseScript(code),
+  let tree = parse(code),
     newTree = transformMain(tree, options)
 
   return newTree
