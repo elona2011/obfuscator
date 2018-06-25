@@ -7,7 +7,7 @@
   "scripts": {
     "start": "npm run demo",
     "build": "babel src --out-dir lib",
-    "demo": "tsc && node ./demo/demo.js",
+    "demo": "node ./demo/demo.js",
     "test": "mocha --require test/register.js",
     "tes": "nyc mocha -r ts-node/register test/**/*.ts&& nyc report --reporter=text-lcov | coveralls",
     "karma": "karma start",
@@ -42,9 +42,6 @@
     "yamutils": "0.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.51",
-    "@babel/preset-env": "^7.0.0-beta.51",
-    "@babel/register": "^7.0.0-beta.51",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
