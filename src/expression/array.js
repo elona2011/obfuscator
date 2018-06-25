@@ -1,9 +1,10 @@
-import { traverseNode, traverseFn, traverseCase, validateTypes } from '../utils/traverse'
-import { parseScript } from 'esprima'
-import { getVarName } from '../utils/util'
+import { getVarName } from 'yamutils'
 import { getMemberExpression } from '../utils/syntaxTree'
-import { CaseOptions } from '../function/case'
 import { transformFn } from '../main'
+import traverse from '@babel/traverse'
+import { parse } from '@babel/parser'
+import { getCaseParams } from '../function/case'
+import * as t from 'babel-types'
 
 /**
  * default value
@@ -16,80 +17,88 @@ const arr = { num: 48, offset: 7, len: 3 }
  */
 export function transformNum(tree) {
   let maxCaseLen = 0
-  traverseNode(tree)(
-    validateTypes(['SwitchStatement'])(node => {
-      maxCaseLen = node.cases.length > maxCaseLen ? node.cases.length : maxCaseLen
-    })
-  )
 
-  const loopArrayVarName = getVarName(1)[0],
+  traverse(tree, {
+    SwitchStatement(path) {
+      maxCaseLen = path.node.cases.length > maxCaseLen ? path.node.cases.length : maxCaseLen
+    },
+  })
+
+  const loopArrayVarName = getVarName(3),
     arrNum = maxCaseLen + 1,
     offset = 7
 
-  traverseFn(tree)((nodeFn, isRoot) => {
-    let fnArr = nodeFn.body.body
+  let isRoot = true
+  traverse(tree, {
+    Function(path) {
+      let fnArr = path.node.body.body
 
-    if (isRoot) {
-      let i = fnArr[0].directive === 'use strict' ? 1 : 0
-      fnArr.splice(
-        i,
-        0,
-        transformFn(
-          parseScript(`var ${loopArrayVarName}=(${loopArray.toString()})(${arrNum},${offset});`)
-            .body[0]
+      if (isRoot) {
+        fnArr.unshift(
+          transformFn(
+            parse(`var ${loopArrayVarName}=(${loopArray.toString()})(${arrNum},${offset});`)
+          ).program.body[0]
         )
-      )
-    }
-
-    setArrValues(arrNum, offset, 3)
-    if (!nodeFn.id || (nodeFn.id && nodeFn.id.name !== 'loopArray')) {
-      //edit while init num
-      let whileIndex = fnArr.findIndex(n => n.type === 'WhileStatement')
-      if (whileIndex > 0) {
-        let stepInitIndex = whileIndex - 1
-        if (fnArr[stepInitIndex].type === 'VariableDeclaration') {
-          fnArr[stepInitIndex].declarations[0].init = getMemberExpression(
-            loopArrayVarName,
-            getArrParam(fnArr[stepInitIndex].declarations[0].init.value)
-          )
-        }
-        fnArr[whileIndex].test.right = getMemberExpression(
-          loopArrayVarName,
-          getArrParam(fnArr[whileIndex].test.right.value)
-        )
+        isRoot = false
       }
 
-      //edit case step num and next step num
-      traverseCase(nodeFn)(null, currentCase => {
-        if (currentCase.switchCase.test && currentCase.switchCase.test.type === 'Literal') {
-          currentCase.switchCase.test = getMemberExpression(
-            loopArrayVarName,
-            getArrParam(currentCase.switchCase.test.value)
-          )
-        }
-        if (currentCase.secondStatement.expression.type === 'AssignmentExpression') {
-          if (currentCase.secondStatement.expression.right.type === 'ConditionalExpression') {
-            if (currentCase.secondStatement.expression.right.consequent.type === 'Literal') {
-              currentCase.secondStatement.expression.right.consequent = getMemberExpression(
-                loopArrayVarName,
-                getArrParam(currentCase.secondStatement.expression.right.consequent.value)
-              )
-            }
-            if (currentCase.secondStatement.expression.right.alternate.type === 'Literal') {
-              currentCase.secondStatement.expression.right.alternate = getMemberExpression(
-                loopArrayVarName,
-                getArrParam(currentCase.secondStatement.expression.right.alternate.value)
-              )
-            }
-          } else if (currentCase.secondStatement.expression.right.type === 'Literal') {
-            currentCase.secondStatement.expression.right = getMemberExpression(
+      setArrValues(arrNum, offset, 3)
+      if (!path.node.id || (path.node.id && path.node.id.name !== 'loopArray')) {
+        //edit while init num
+        let whileIndex = fnArr.findIndex(n => n.type === 'WhileStatement')
+        if (whileIndex > 0) {
+          let stepInitIndex = whileIndex - 1
+          if (fnArr[stepInitIndex].type === 'VariableDeclaration') {
+            fnArr[stepInitIndex].declarations[0].init = getMemberExpression(
               loopArrayVarName,
-              getArrParam(currentCase.secondStatement.expression.right.value)
+              getArrParam(fnArr[stepInitIndex].declarations[0].init.value)
             )
           }
+          fnArr[whileIndex].test.right = getMemberExpression(
+            loopArrayVarName,
+            getArrParam(fnArr[whileIndex].test.right.value)
+          )
         }
-      })
-    }
+
+        //edit case step num and next step num
+        path.traverse({
+          Function(path) {
+            path.skip()
+          },
+          SwitchCase(path) {
+            let { switchCase, secondStatement } = getCaseParams(path)
+            
+            if (t.isNumericLiteral(switchCase.test)) {
+              switchCase.test = getMemberExpression(
+                loopArrayVarName,
+                getArrParam(switchCase.test.value)
+              )
+            }
+            if (secondStatement.expression.type === 'AssignmentExpression') {
+              if (secondStatement.expression.right.type === 'ConditionalExpression') {
+                if (secondStatement.expression.right.consequent.type === 'NumericLiteral') {
+                  secondStatement.expression.right.consequent = getMemberExpression(
+                    loopArrayVarName,
+                    getArrParam(secondStatement.expression.right.consequent.value)
+                  )
+                }
+                if (secondStatement.expression.right.alternate.type === 'NumericLiteral') {
+                  secondStatement.expression.right.alternate = getMemberExpression(
+                    loopArrayVarName,
+                    getArrParam(secondStatement.expression.right.alternate.value)
+                  )
+                }
+              } else if (secondStatement.expression.right.type === 'NumericLiteral') {
+                secondStatement.expression.right = getMemberExpression(
+                  loopArrayVarName,
+                  getArrParam(secondStatement.expression.right.value)
+                )
+              }
+            }
+          },
+        })
+      }
+    },
   })
 }
 

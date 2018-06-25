@@ -1,11 +1,8 @@
 import { deepCopy } from '../utils/util'
-import {
-  createNewCase,
-  isNextStep,
-  newVariableDeclaration,
-} from '../utils/syntaxTree'
+import { createNewCase, isNextStep, newVariableDeclaration } from '../utils/syntaxTree'
 import { traverseCaseRaw, traverseNode, validateTypes } from '../utils/traverse'
 import * as t from 'babel-types'
+import traverse from '@babel/traverse'
 
 /**
  * get traverseCase and traverseCaseRaw arguments
@@ -13,14 +10,13 @@ import * as t from 'babel-types'
  * @param parent
  * @param varName
  */
-const getCaseParams = path => {
+export const getCaseParams = path => {
   if (!t.isSwitchCase(path.node) || !t.isSwitchStatement(path.parent))
     throw new Error('path.node is not SwitchCase node')
-    
+
   let varName = null
   if (path.node.consequent.length >= 2) {
-    varName =
-      path.node.consequent[path.node.consequent.length - 2].expression.left.name
+    varName = path.node.consequent[path.node.consequent.length - 2].expression.left.name
   }
   return {
     path,
@@ -33,16 +29,14 @@ const getCaseParams = path => {
   }
 }
 
-const getCaseNum = switchCase => switchCase.test.value
-const setCaseNum = (switchCase, num) => (switchCase.test.value = num)
-const getNextNum = switchCase =>
+export const getCaseNum = switchCase => switchCase.test.value
+export const setCaseNum = (switchCase, num) => (switchCase.test.value = num)
+export const getNextNum = switchCase =>
   switchCase.consequent[switchCase.consequent.length - 2].expression.right.value
-const setNextNum = (switchCase, num) =>
-  (switchCase.consequent[
-    switchCase.consequent.length - 2
-  ].expression.right.value = num)
+export const setNextNum = (switchCase, num) =>
+  (switchCase.consequent[switchCase.consequent.length - 2].expression.right.value = num)
 
-function astMultiStatement(path) {
+export function astMultiStatement(path) {
   let { caseLen, switchCase, switchStatement } = getCaseParams(path)
 
   if (switchCase.consequent.length > 3) {
@@ -72,14 +66,8 @@ function astMultiStatement(path) {
   }
 }
 
-function astMultiDeclaration(path) {
-  let {
-    caseLen,
-    switchCase,
-    firstStatement,
-    varName,
-    switchStatement,
-  } = getCaseParams(path)
+export function astMultiDeclaration(path) {
+  let { caseLen, switchCase, firstStatement, varName, switchStatement } = getCaseParams(path)
   if (
     switchCase.consequent.length === 3 &&
     firstStatement.type === 'VariableDeclaration' &&
@@ -89,13 +77,9 @@ function astMultiDeclaration(path) {
       let newCase = createNewCase(
         varName,
         caseLen + i,
-        i === firstStatement.declarations.length - 1
-          ? getNextNum(switchCase)
-          : caseLen + i + 1
+        i === firstStatement.declarations.length - 1 ? getNextNum(switchCase) : caseLen + i + 1
       )
-      newCase.consequent.unshift(
-        newVariableDeclaration(firstStatement.declarations[i])
-      )
+      newCase.consequent.unshift(newVariableDeclaration(firstStatement.declarations[i]))
       switchStatement.cases.push(newCase)
     }
     firstStatement.declarations.length = 1
@@ -103,7 +87,7 @@ function astMultiDeclaration(path) {
   }
 }
 
-function astMultiNextStep(path) {
+export function astMultiNextStep(path) {
   let { switchCase, varName } = getCaseParams(path)
   let i = switchCase.consequent.findIndex(n => isNextStep(n, varName))
   if (i < switchCase.consequent.length - 2) {
@@ -115,12 +99,13 @@ function astMultiNextStep(path) {
  *
  * @param tree
  */
-export const disorderCase = tree =>
-  traverseNode(tree)(
-    validateTypes(['SwitchStatement'])((node, parent) =>
-      node.cases.sort((a, b) => Math.random() - 0.5)
-    )
-  )
+export const disorderCase = tree => {
+  traverse(tree, {
+    SwitchStatement(path) {
+      path.node.cases.sort((a, b) => Math.random() - 0.5)
+    },
+  })
+}
 
 /**
  * 将多行语句分解到多个case中
@@ -131,15 +116,4 @@ export const transformConsequent = tree => {
   trvCase(astMultiNextStep)
   trvCase(astMultiStatement)
   trvCase(astMultiDeclaration)
-}
-
-export {
-  astMultiStatement,
-  astMultiDeclaration,
-  astMultiNextStep,
-  getCaseParams,
-  getNextNum,
-  setNextNum,
-  getCaseNum,
-  setCaseNum,
 }

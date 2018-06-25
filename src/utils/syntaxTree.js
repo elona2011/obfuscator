@@ -6,33 +6,14 @@ export const getNextStep = (stepName, nextNum) =>
 export function getMemberExpression(name, valueArr) {
   if (valueArr.length === 0) throw 'valueArr.length should above 0!'
 
-  let r = {
-    type: 'MemberExpression',
-    computed: true,
-    property: getLiteral(valueArr[0]),
-    object: {
-      type: 'Identifier',
-      name,
-    },
-  }
+  let r = t.memberExpression(t.identifier(name), t.numericLiteral(valueArr[0]), true)
   for (let i = 1; i < valueArr.length; i++) {
-    r = {
-      type: 'MemberExpression',
-      computed: true,
-      property: getLiteral(valueArr[i]),
-      object: r,
-    }
+    r = t.memberExpression(r, t.numericLiteral(valueArr[i]), true)
   }
   return r
 }
 
-export const getCallExpression3 = (
-  calleeName,
-  arg1Name,
-  arg1IsCall,
-  arg2,
-  arg3
-) => ({
+export const getCallExpression3 = (calleeName, arg1Name, arg1IsCall, arg2, arg3) => ({
   type: 'CallExpression',
   callee: {
     type: 'CallExpression',
@@ -59,18 +40,11 @@ export const newVariableDeclaration = declaration => ({
 })
 
 export const newAssignmentExpression = (stepName, nextNum) => {
-  return t.assignmentExpression(
-    '=',
-    t.identifier(stepName),
-    t.numericLiteral(nextNum)
-  )
+  return t.assignmentExpression('=', t.identifier(stepName), t.numericLiteral(nextNum))
 }
 
 export const createNewCase = (stepName, caseNum, nextNum) =>
-  t.switchCase(t.numericLiteral(caseNum), [
-    getNextStep(stepName, nextNum),
-    t.breakStatement(),
-  ])
+  t.switchCase(t.numericLiteral(caseNum), [getNextStep(stepName, nextNum), t.breakStatement()])
 
 export const getLiteral = value => ({
   type: 'Literal',

@@ -11,9 +11,15 @@ export const transformOptionsDefault = {
  * main transform
  * @param tree
  */
-export function transformMain(tree, options = transformOptionsDefault) {
+export function transformMain(tree, options) {
+  Object.keys(transformOptionsDefault).forEach(n => {
+    if (options[n] === undefined) {
+      options[n] = transformOptionsDefault[n]
+    }
+  })
+
   transformFn(tree, options)
-  // afterFn(tree, options)
+  afterFn(tree, options)
 
   return tree
 }

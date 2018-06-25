@@ -1,10 +1,4 @@
 import { transformOptions, transformOptionsDefault } from '.'
-import {
-  traverseFn,
-  traverseCase,
-  replaceNode,
-  traverseNode,
-} from './utils/traverse'
 import { getVarName } from './utils/util'
 import { astFn } from './function/fn'
 import { transformStatement, getStatementNum } from './loop/statement'
@@ -17,8 +11,7 @@ import {
 } from './function/case'
 import { astExp } from './expression/expression'
 import { astWindow } from './literal/global'
-import { astSplitString, collectString } from './literal/string'
-import { astComputedMember, transformComputedMember } from './expression/member'
+import { astSplitString, collectString, getAllChars, astStr } from './literal/string'
 import { transformNum } from './expression/array'
 import * as t from 'babel-types'
 import traverse from '@babel/traverse'
@@ -50,10 +43,7 @@ export function transformFn(tree, options = transformOptionsDefault) {
     //   astWindow(path)
     // },
     enter(path) {
-      if (
-        t.isFunctionDeclaration(path.node) ||
-        t.isFunctionExpression(path.node)
-      ) {
+      if (t.isFunctionDeclaration(path.node) || t.isFunctionExpression(path.node)) {
         // let names = getVarName(1),
         // editFn = replaceNode(path.node)
         //edit if/for/while/dowhile
@@ -127,7 +117,9 @@ export function transformFn(tree, options = transformOptionsDefault) {
 }
 
 export const afterFn = (tree, options = transformOptionsDefault) => {
-  transformComputedMember(tree)
-
+  // transformComputedMember(tree)
   options.numberToArray && transformNum(tree)
+  options.disorderCase && disorderCase(tree)
+
+  astStr(tree)
 }
